@@ -1,29 +1,49 @@
-from abs import ABC, abstractmethod
+from abc import ABC, abstractmethod
+from ..board import chessfield, chessboard, move
 from .color import Color
 
 
 class IChessman(ABC):
 
-    @abstractmethod
+    def __init__(
+            self,
+            position: chessfield.ChessField,
+            color: Color,
+    ) -> None:
+        self.color = color
+        self.position = position
+        position.chessman = self
+
+    @property
     def get_position(self):
-        pass 
+        return self.position
 
     @abstractmethod
-    def new_position(self, row, col, chessfield):
+    def get_possible_moves(
+            self,
+            all_position: list[list[chessfield.ChessField]]
+    ) -> list[list[chessfield.ChessField]]:
         pass
 
+    def check_position_exists(
+            self,
+            new_position: chessfield.ChessField,
+            all_positions: list[list[chessfield.ChessField]],
+    ) -> bool:
+        
+        possible_moves = self.get_possible_moves(all_positions)
+        return new_position in possible_moves
 
-class BaseChessman(IChessman):
+    def go_to_position(
+            self,
+            new_position: chessfield.ChessField,
+            board: chessboard.ChessBoard,
+    ) -> move.ChessMove:
+        if not self.check_position_exists(new_position, board.board):
+            raise ValueError("Values is not valid")
 
-    def __init__(self, row: int, col: int, color: Color):
-        self.row = row
-        self.col = col
-        self.color = color
+        chess_move = move.ChessMove(self.position, new_position)
+        new_position.chessman = self
+        self.position = new_position
 
-    def get_position(self):
-        return self.row, self.col 
-
-    def is_out_of_field(self, row, col):
-        if not (0 <= row <= 7 and 0 <= col <= 7):
-            return False 
-        return True
+        return chess_move
