@@ -1,0 +1,1 @@
+pytest test/test_knight.py && pytest test/test_queen.py && pytest test/test_game.py
